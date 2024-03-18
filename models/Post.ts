@@ -1,6 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BeforeUpdate, DeleteDateColumn, BeforeInsert } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BeforeUpdate, DeleteDateColumn, BeforeInsert, OneToOne, JoinColumn, OneToMany, ManyToOne } from "typeorm"
 import slugify from 'slugify'; 
 import { AppDataSource } from "../config/db";
+import { User } from "./User";
+
+// Define enum for status options
+export enum PostStatus {
+    DRAFT = 'draft',
+    PUBLISHED = 'published',
+    BLOCKED = 'blocked',
+}
 
 @Entity({ name: "posts" })
 export class Post {
@@ -20,16 +28,26 @@ export class Post {
     @Column("text")
     description!: string
 
-    @Column({
-        default: false
-    })
-    isPublished!: boolean
+    @Column()
+    userId!: string;
+
+    @ManyToOne(() => User, user => user.posts)
+    user!: User;
+
+    @Column({ type: 'enum', enum: PostStatus, default: PostStatus.DRAFT }) // default value is Draft
+    status!: PostStatus;
 
     @Column({
         type: "timestamp",
         nullable: true
     })
     publishedAt!: Date | null;
+
+    @Column({
+        type: "timestamp",
+        nullable: true
+    })
+    blockedAt!: Date | null;
 
     @CreateDateColumn()
     createdAt!: Date;
@@ -41,10 +59,13 @@ export class Post {
     deletedAt!: Date;
 
     @BeforeUpdate()
-    updatePublishedDate() {
-        if (this.isPublished) {
+    updateStatusDate() {
+        if (this.status === PostStatus.PUBLISHED) {
             this.publishedAt = new Date();
+        } else if (this.status === PostStatus.BLOCKED) {
+            this.blockedAt = new Date();
         } else {
+            this.blockedAt = null;
             this.publishedAt = null;
         }
     }

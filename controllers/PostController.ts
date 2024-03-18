@@ -16,12 +16,11 @@ class PostController {
     
     add = async (req: Request, res: Response) => {
         try {
-            const { title, description, isPublished } = req.body;
+            const { title, description } = req.body;
     
             const post = new Post();
             post.title = title
             post.description = description
-            post.isPublished = isPublished
     
             const result = await AppDataSource.manager.save(post)
     
@@ -60,7 +59,7 @@ class PostController {
     updateById = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const { title, description, isPublished } = req.body;
+            const { title, description } = req.body;
     
             const post = await postRepository.findOneBy({ id });
             if (!post) {
@@ -69,7 +68,6 @@ class PostController {
     
             if (title) post.title = title;
             if (description) post.description = description;
-            if (isPublished) post.isPublished = isPublished === "true";
     
             await postRepository.save(post);
             res.status(200).json({ post });
