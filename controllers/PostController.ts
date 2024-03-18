@@ -67,9 +67,9 @@ class PostController {
                 return res.status(404).json({ error: 'Not Found', message: 'Post not found' });
             }
     
-            if (title !== undefined) post.title = title;
-            if (description !== undefined) post.description = description;
-            if (isPublished !== undefined) post.isPublished = isPublished === "true";
+            if (title) post.title = title;
+            if (description) post.description = description;
+            if (isPublished) post.isPublished = isPublished === "true";
     
             await postRepository.save(post);
             res.status(200).json({ post });
@@ -85,7 +85,7 @@ class PostController {
             if (!post) {
                 return res.status(400).json({ error: 400, message: "data not found" });
             }
-            await postRepository.remove(post);
+            await postRepository.softRemove(post);
             res.sendStatus(204);
         } catch (e: any) {
             res.status(500).json({ error: e.toString() });
