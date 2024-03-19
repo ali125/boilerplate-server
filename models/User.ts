@@ -1,6 +1,7 @@
 import { BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import bcrypt from "bcrypt";
 import { Post } from "./Post";
+import { RefreshToken } from "./RefreshToken";
 
 // Define enum for status options
 export enum UserStatus {
@@ -51,6 +52,9 @@ export class User {
     @OneToMany(() => Post, post => post.user)
     posts!: Post[];
 
+    @OneToMany(() => RefreshToken, token => token.user)
+    refreshTokens!: RefreshToken[];
+
     @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE }) // default value is Draft
     status!: UserStatus;
 
@@ -59,7 +63,6 @@ export class User {
         nullable: true
     })
     blockedAt!: Date | null;
-
 
     @CreateDateColumn()
     createdAt!: Date;

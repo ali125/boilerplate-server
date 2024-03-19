@@ -23,6 +23,10 @@ class UserController {
                 email,
                 mobile,
             } = req.body;
+
+            if (!email || !password) {
+                return res.status(400).json({ error: "Username and password are required!" })
+            }
     
             const user = new User();
             user.firstName = firstName
@@ -30,6 +34,13 @@ class UserController {
             user.password = password
             user.email = email
             if (mobile) user.mobile = mobile
+
+            // check for duplicate email in the db
+            const duplicate = await userRepository.findOneBy({ email });
+            if (duplicate) {
+                // 409 Conflict
+                return res.status(409).json({ error: "This Email is already exists." })
+            }
     
             const result = await AppDataSource.manager.save(user)
     
@@ -104,4 +115,6 @@ class UserController {
     };
 }
 
-export default new UserController();
+const userController = new UserController();
+
+export default userController;
