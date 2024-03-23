@@ -9,14 +9,11 @@ export class RefreshToken {
     @Column()
     token!: string;
 
-    @Column()
-    device!: string;
+    @Column({ nullable: true })
+    userAgent!: string;
     
-    @Column()
+    @Column({ nullable: true })
     ip!: string;
-    
-    @Column()
-    location!: string;
 
     @Column()
     userId!: string;

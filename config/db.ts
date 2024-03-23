@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { Post } from "../models/Post";
 import { User } from "../models/User";
+import { RefreshToken } from "../models/RefreshToken";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -11,7 +12,7 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: true,
-    entities: [Post, User],
+    entities: [Post, User, RefreshToken],
     subscribers: [],
     migrations: [],
 });

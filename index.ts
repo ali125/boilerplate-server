@@ -1,8 +1,8 @@
 import "reflect-metadata";
 require("dotenv").config();
 import express from "express";
-
 const app = express();
+import cookieParser from "cookie-parser";
 import { AppDataSource } from "./config/db";
 import RootRouter from "./routes";
 
@@ -14,6 +14,9 @@ app.use(express.urlencoded({ extended: false }));
 
 // built-in middleware for json
 app.use(express.json());
+
+// middleware for cookies
+app.use(cookieParser());
 
 // boot routes
 app.use(RootRouter);
