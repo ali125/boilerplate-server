@@ -118,6 +118,81 @@ class AuthController {
         }
     };
 
+    refreshTokenAccess = async (req: Request, res: Response) => {
+        const cookies = req.cookies;
+
+        if (!cookies.jwt) {
+            return res.sendStatus(401);
+        }
+        const refreshToken = cookies.jwt;
+
+        const foundToken = await refreshTokenRepository.findOne({ where: { token: refreshToken }, relations: ['user']});
+
+        if (!foundToken) {
+            jwt.verify(
+                refreshToken,
+                process.env.REFRESH_TOKEN_SECRET as string,
+                async (err: any, decoded: any) => {
+                    if (err) {
+                        return res.sendStatus(403); // Forbidden
+                    }
+                    console.log("attempted refresh token reuse!");
+                    const hackedUser = await userRepository.findOneBy({ email: decoded.email });
+                    if (hackedUser) {
+                        const result = await refreshTokenRepository.softRemove({ userId: hackedUser.id });
+                        console.log(result);
+                    }
+                }
+            );
+            return res.sendStatus(403); // Forbidden
+        }
+
+        // evaluate jwt
+        jwt.verify(
+            refreshToken,
+            process.env.REFRESH_TOKEN_SECRET as string,
+            async (err: any, decoded: any) => {
+                if (err) {
+                    console.log("expired refresh token");
+                    const result = await refreshTokenRepository.softRemove(foundToken);
+                    console.log(result);
+                }
+                if (err || foundToken.user.email !== decoded.email) {
+                    return res.sendStatus(403); // Forbidden
+                }
+                // Refresh token was still valid
+                const user = await userRepository.findOneBy({ email: decoded.email });
+                if (!user) return res.sendStatus(403);
+
+                const accessToken = jwt.sign(
+                    { userInfo: { email: user.email } },
+                    process.env.ACCESS_TOKEN_SECRET as string,
+                    { expiresIn: "120s" }
+                );
+
+                const newRefreshToken = jwt.sign(
+                    { email: user.email },
+                    process.env.REFRESH_TOKEN_SECRET as string,
+                    { expiresIn: "1d" }
+                );
+
+                const refreshToken = new RefreshToken();
+                refreshToken.ip = req.ip || "";
+                refreshToken.userAgent = req.headers['user-agent'] || "";
+                refreshToken.token = newRefreshToken;
+                refreshToken.user = user;
+
+                // Save the new refresh token with current user
+                const result = await refreshTokenRepository.save(refreshToken);
+                console.log(result);
+
+                // Create Secure Cookie with refresh token
+                res.cookie("jwt", newRefreshToken, { httpOnly: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 60 * 1000});
+                res.json({ accessToken });
+            }
+        );
+    };
+
     logout = async (req: Request, res: Response) => {
         // On client, also delete the accessToken
         const cookies = req.cookies;
