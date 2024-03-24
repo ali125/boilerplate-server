@@ -10,7 +10,7 @@ class UserController {
             const users = await userRepository.find();
             res.status(200).json({ users });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() })
+            res.status(500).json({ error: e.message })
         }
     }
     
@@ -50,7 +50,7 @@ class UserController {
                 // 409 Conflict
                 return res.status(409).json({ error: "This Email is already exists." })
             }
-            res.status(500).json({ error: e.toString() })
+            res.status(500).json({ error: e.message })
         }
     }
     
@@ -63,7 +63,7 @@ class UserController {
             }
             res.status(200).json({ user });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
     };
 
@@ -96,7 +96,7 @@ class UserController {
                 // 409 Conflict
                 return res.status(409).json({ error: "This Email is already exists." })
             }
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
     };
 
@@ -110,7 +110,7 @@ class UserController {
             await userRepository.softRemove(user);
             res.sendStatus(204);
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
     };
 }

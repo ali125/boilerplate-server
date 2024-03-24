@@ -41,7 +41,7 @@ class AuthController {
     
             res.status(201).json({ result });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
     };
 
@@ -114,9 +114,32 @@ class AuthController {
             res.cookie("jwt", newRefreshToken, { httpOnly: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 60 * 1000});
             res.json({ accessToken });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
-    } 
+    };
+
+    logout = async (req: Request, res: Response) => {
+        // On client, also delete the accessToken
+        const cookies = req.cookies;
+        if (!cookies.jwt) return res.sendStatus(204); // No content
+        const refreshToken = cookies.jwt;
+
+        const foundToken = await refreshTokenRepository.findOneBy({ token: refreshToken });
+        if (!foundToken) {
+            // "sameSite" => if the front-end is not in the same domain, this option should add as(sameSite: "none")
+            // "httpOnly" => cookie is not available to javascript
+            // scure: true => Don't use this while testing on "Thunder client"
+            res.clearCookie("jwt", { httpOnly: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000 });
+            return res.sendStatus(403);
+        }
+        // Delete refreshToken in db
+        const result = await refreshTokenRepository.softRemove(foundToken);
+        console.log(result);
+
+        // secure: true => Don't use this while testing on "Thunder client"
+        res.clearCookie("jwt", { httpOnly: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000 });
+        return res.sendStatus(204);
+    };
 }
 
 const authController = new AuthController();

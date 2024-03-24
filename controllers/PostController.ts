@@ -10,7 +10,7 @@ class PostController {
             const posts = await postRepository.find();
             res.status(200).json({ posts });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() })
+            res.status(500).json({ error: e.message })
         }
     }
     
@@ -26,7 +26,7 @@ class PostController {
     
             res.status(201).json({ result });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() })
+            res.status(500).json({ error: e.message })
         }
     }
     
@@ -39,7 +39,7 @@ class PostController {
             }
             res.status(200).json({ post });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
     };
     
@@ -52,7 +52,7 @@ class PostController {
             }
             res.status(200).json({ post });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
     };
 
@@ -72,7 +72,7 @@ class PostController {
             await postRepository.save(post);
             res.status(200).json({ post });
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
     };
 
@@ -86,7 +86,7 @@ class PostController {
             await postRepository.softRemove(post);
             res.sendStatus(204);
         } catch (e: any) {
-            res.status(500).json({ error: e.toString() });
+            res.status(500).json({ error: e.message });
         }
     };
 }
