@@ -1,14 +1,16 @@
 import { Response, Request } from "express";
 import { Post } from "../models/Post";
 import { AppDataSource } from "../config/db";
+import { User } from "../models/User";
 
 const postRepository = AppDataSource.getRepository(Post);
+const userRepository = AppDataSource.getRepository(User);
 
 class PostController {
     getAll = async (req: Request, res: Response) => {
         try {
-            const posts = await postRepository.find();
-            res.status(200).json({ posts });
+            const data = await postRepository.find();
+            res.status(200).json({ data });
         } catch (e: any) {
             res.status(500).json({ error: e.message })
         }
@@ -17,10 +19,17 @@ class PostController {
     add = async (req: Request, res: Response) => {
         try {
             const { title, description } = req.body;
+
+            const user = await userRepository.findOne({ where: { email: req.email }, select: ['id']});
+
+            if (!user) {
+                return res.sendStatus(401); // Unauthorized
+            }
     
             const post = new Post();
-            post.title = title
-            post.description = description
+            post.title = title;
+            post.description = description;
+            post.userId = user.id;
     
             const result = await AppDataSource.manager.save(post)
     
@@ -33,11 +42,11 @@ class PostController {
     getById = async (req: Request, res: Response) => {
         try {
             const id = req.params.id;
-            const post = await postRepository.findOneBy({ id });
-            if (!post) {
+            const data = await postRepository.findOneBy({ id });
+            if (!data) {
                 return res.status(400).json({ error: 400, message: "data not found" });
             }
-            res.status(200).json({ post });
+            res.status(200).json({ data });
         } catch (e: any) {
             res.status(500).json({ error: e.message });
         }
@@ -70,7 +79,7 @@ class PostController {
             if (description) post.description = description;
     
             await postRepository.save(post);
-            res.status(200).json({ post });
+            res.status(200).json({ data: post });
         } catch (e: any) {
             res.status(500).json({ error: e.message });
         }

@@ -8,7 +8,7 @@ class UserController {
     getAll = async (req: Request, res: Response) => {
         try {
             const users = await userRepository.find();
-            res.status(200).json({ users });
+            res.status(200).json({ data: users });
         } catch (e: any) {
             res.status(500).json({ error: e.message })
         }
@@ -44,7 +44,7 @@ class UserController {
     
             const result = await AppDataSource.manager.save(user)
     
-            res.status(201).json({ result });
+            res.status(201).json({ data: result });
         } catch (e: any) {
             if (e?.code === "23505") {
                 // 409 Conflict
@@ -61,7 +61,7 @@ class UserController {
             if (!user) {
                 return res.status(400).json({ error: 400, message: "data not found" });
             }
-            res.status(200).json({ user });
+            res.status(200).json({ data: user });
         } catch (e: any) {
             res.status(500).json({ error: e.message });
         }
@@ -86,11 +86,11 @@ class UserController {
             if (firstName) user.firstName = firstName;
             if (lastName) user.lastName = lastName;
             if (password) user.password = password;
-            if (email) user.email = email;
+            if (email && user.email !== email) user.email = email;
             if (mobile) user.mobile = mobile
-    
-            await userRepository.save(user);
-            res.status(200).json({ user });
+
+            await userRepository.manager.save(user);
+            res.status(200).json({ data: user });
         } catch (e: any) {
             if (e?.code === "23505") {
                 // 409 Conflict
@@ -107,6 +107,8 @@ class UserController {
             if (!user) {
                 return res.status(400).json({ error: 400, message: "data not found" });
             }
+            user.email = `${new Date().toString()}-${user.email}`
+            await userRepository.manager.save(user);
             await userRepository.softRemove(user);
             res.sendStatus(204);
         } catch (e: any) {
