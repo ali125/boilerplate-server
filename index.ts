@@ -5,9 +5,13 @@ const app = express();
 import cookieParser from "cookie-parser";
 import { AppDataSource } from "./config/db";
 import RootRouter from "./routes";
+import { logger } from "./middleware/logEvents";
 
 // Server port
 const PORT = process.env.PORT || 3500;
+
+// custom middleware logger
+app.use(logger);
 
 // built-in middleware to handleurlencoded form data
 app.use(express.urlencoded({ extended: false }));
