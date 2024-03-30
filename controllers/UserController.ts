@@ -9,6 +9,7 @@ class UserController {
         try {
             const users = await userRepository.find();
             res.status(200).json({ data: users });
+            res.status(200).json({ data: users });
         } catch (e: any) {
             res.status(500).json({ error: e.message })
         }

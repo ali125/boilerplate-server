@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { AppDataSource } from "./config/db";
 import RootRouter from "./routes";
 import { logger } from "./middleware/logEvents";
+import errorHandler from "./middleware/errorHandler";
 
 // Server port
 const PORT = process.env.PORT || 3500;
@@ -24,6 +25,9 @@ app.use(cookieParser());
 
 // boot routes
 app.use(RootRouter);
+
+// custom error handler
+app.use(errorHandler);
 
 AppDataSource.initialize()
     .then(() => {

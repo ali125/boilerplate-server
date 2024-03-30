@@ -7,7 +7,7 @@ import { NextFunction, Request, Response } from "express";
 
 export const logEvents = async (message: string, logName: string) => {
     const dateTime = format(new Date(), "yyyy-MM-dd\tHH:mm:ss")
-    const logItem = `${dateTime}\t${uuidv4()}\t${message}`;
+    const logItem = `${dateTime}\t${uuidv4()}\t${message}\n`;
 
     const DIR = path.join(__dirname, "..", "logs");
 
